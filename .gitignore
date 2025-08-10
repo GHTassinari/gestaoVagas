@@ -48,8 +48,9 @@ build/
 
 ### Arquivos sensíveis ###
 .env
-application-*.yml
-application-*.yaml
-application-*.properties
+**/application.properties
+**/application-*.yml
+**/application-*.yaml
+**/application-*.properties
 *.properties.local
 docker-compose*.yml
