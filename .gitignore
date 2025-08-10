@@ -52,3 +52,4 @@ application-*.yml
 application-*.yaml
 application-*.properties
 *.properties.local
+docker-compose*.yml
