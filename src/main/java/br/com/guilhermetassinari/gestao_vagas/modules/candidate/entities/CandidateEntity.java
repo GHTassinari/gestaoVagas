@@ -1,6 +1,4 @@
-package br.com.guilhermetassinari.gestao_vagas.modules.candidate;
-import java.time.LocalDateTime;
-import java.util.UUID;
+package br.com.guilhermetassinari.gestao_vagas.modules.candidate.entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,6 +9,9 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.Length;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Entity(name = "candidate")

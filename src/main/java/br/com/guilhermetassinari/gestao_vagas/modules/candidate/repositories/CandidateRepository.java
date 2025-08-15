@@ -1,5 +1,6 @@
-package br.com.guilhermetassinari.gestao_vagas.modules.candidate;
+package br.com.guilhermetassinari.gestao_vagas.modules.candidate.repositories;
 
+import br.com.guilhermetassinari.gestao_vagas.modules.candidate.entities.CandidateEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
