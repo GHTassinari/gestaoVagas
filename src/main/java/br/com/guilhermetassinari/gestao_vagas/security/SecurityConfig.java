@@ -15,7 +15,15 @@ public class SecurityConfig {
         // The object is from the type <CsrfConfigurer<HttpSecurity>>
         // Abstract Http Configurer is the base class for many spring configurers
         // So, it is the same as doing csrf -> csrf(), using the disable() static method
-        http.csrf(AbstractHttpConfigurer::disable);
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers("/candidate/").permitAll()
+                            .requestMatchers("/company/").permitAll();
+
+                auth.anyRequest().authenticated();
+
+
+                        });
         return http.build();
     }
 
