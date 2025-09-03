@@ -14,7 +14,7 @@ public class JWTProvider {
     // More robust way than printStackTrace, using a logger to show the errors
     private static final Logger logger = LoggerFactory.getLogger(JWTProvider.class);
 
-    @Value("${security.token.secret}")
+    @Value("${security.token.secret.company}")
     private String secretKey;
 
     public String validateToken(String token) {

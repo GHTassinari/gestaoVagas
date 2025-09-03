@@ -55,7 +55,8 @@ public class AuthCandidateUseCase {
                 .sign(algorithm);
 
         return AuthCandidateResponseDTO.builder()
-                .acessToken(token)
+                .accessToken(token)
+                .expires_in(expiration.toEpochMilli())
                 .build();
     }
 }
