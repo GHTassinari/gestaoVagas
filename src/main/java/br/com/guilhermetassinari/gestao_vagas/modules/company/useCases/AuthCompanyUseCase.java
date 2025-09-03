@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class AuthCompanyUseCase {
 
-    @Value("${security.token.secret}")
+    @Value("${security.token.secret.company}")
     private String secretKey;
 
     @Value("${security.token.expiration:3600}")
