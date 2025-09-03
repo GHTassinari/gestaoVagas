@@ -3,6 +3,7 @@ package br.com.guilhermetassinari.gestao_vagas.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,9 +13,11 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
 
-    private final SecurityFilter securityFilter;
+    private final SecurityCompanyFilter securityCompanyFilter;
+    private final SecurityCandidateFilter securityCandidateFilter;
 
     // @Bean a method inside this, says to spring that it will use a method already managed by spring.
     @Bean
@@ -26,10 +29,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/candidate/").permitAll()
                             .requestMatchers("/company/").permitAll()
-                            .requestMatchers("/auth/company").permitAll()
+                            .requestMatchers("/company/auth").permitAll()
                             .requestMatchers("/candidate/auth").permitAll();
                     auth.anyRequest().authenticated();
-                }).addFilterBefore(securityFilter, BasicAuthenticationFilter.class);
+                })
+                .addFilterBefore(securityCandidateFilter, BasicAuthenticationFilter.class)
+                .addFilterBefore(securityCompanyFilter, BasicAuthenticationFilter.class);
+
         return http.build();
     }
 
