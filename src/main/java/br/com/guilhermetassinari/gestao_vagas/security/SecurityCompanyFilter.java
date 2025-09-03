@@ -7,12 +7,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor
@@ -29,14 +29,20 @@ public class SecurityCompanyFilter extends OncePerRequestFilter {
 
         if (request.getRequestURI().startsWith("/company")) {
             if (header != null) {
-                var subjectToken = jwtProvider.validateToken(header);
+                var token = jwtProvider.validateToken(header);
 
-                if (subjectToken.isEmpty()) {
+                if (token == null) {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     return;
                 }
-                request.setAttribute("company_id", subjectToken);
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(subjectToken, null, Collections.emptyList());
+
+                var roles = token.getClaim("roles").asList(Object.class);
+                var grants = roles.stream()
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toString().toUpperCase())).toList();
+
+                request.setAttribute("company_id", token.getSubject());
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(token.getSubject(),
+                        null, grants);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
 

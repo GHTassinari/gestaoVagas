@@ -1,6 +1,7 @@
 package br.com.guilhermetassinari.gestao_vagas.modules.company.useCases;
 
 import br.com.guilhermetassinari.gestao_vagas.modules.company.dto.AuthCompanyDTO;
+import br.com.guilhermetassinari.gestao_vagas.modules.company.dto.AuthCompanyResponseDTO;
 import br.com.guilhermetassinari.gestao_vagas.modules.company.repositories.CompanyRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.function.Supplier;
 
 @Service
@@ -28,7 +30,7 @@ public class AuthCompanyUseCase {
 
     private final PasswordEncoder passwordEncoder;
 
-    public String execute(AuthCompanyDTO authCompanyDTO) {
+    public AuthCompanyResponseDTO execute(AuthCompanyDTO authCompanyDTO) {
         var company = this.companyRepository.findByUsername(authCompanyDTO.getUsername());
 
         // Supplier postpone the execution, being a function that doesn't receive any arguments. But that returns a value
@@ -46,17 +48,25 @@ public class AuthCompanyUseCase {
             throw exception.get();
         }
 
-        return generateToken(foundCompany.getId().toString());
-    }
-
-    private String generateToken(String companyId){
-        Algorithm algorithm = Algorithm.HMAC256(secretKey);
         Instant now = Instant.now();
         Instant expiration = now.plus(Duration.ofSeconds(tokenExpirationInSeconds));
+
+        var token = generateToken(foundCompany.getId().toString(), expiration, now);
+
+        return AuthCompanyResponseDTO.builder()
+                .accessToken(token)
+                .expires_in(expiration.toEpochMilli())
+                .build();
+    }
+
+    private String generateToken(String companyId, Instant expiration, Instant now){
+        Algorithm algorithm = Algorithm.HMAC256(secretKey);
+
 
         return JWT.create()
                 .withIssuer("javagas")
                 .withSubject(companyId)
+                .withClaim("roles", List.of("COMPANY"))
                 .withIssuedAt(now)
                 .withExpiresAt(expiration)
                 .sign(algorithm);
