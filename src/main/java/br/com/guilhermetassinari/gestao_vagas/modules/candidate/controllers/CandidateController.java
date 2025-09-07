@@ -27,6 +27,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/candidate")
 @RequiredArgsConstructor
+@Tag(name = "Candidate", description = "Information related to the Candidate")
 public class CandidateController {
 
     private final CreateCandidateUseCase createCandidateUseCase;
@@ -36,6 +37,17 @@ public class CandidateController {
     private final ListAllJobsByFilterUseCase listAllJobsByFilterUseCase;
 
     @PostMapping("/")
+    @Operation(summary = "Register the candidate",
+            description = "This function is responsible to register the candidate")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(
+                            schema = @Schema(implementation = CandidateEntity.class)
+                    )
+            }),
+            @ApiResponse(responseCode = "400", description = "User already exists")
+    }
+    )
     public ResponseEntity<Object> create(@Valid @RequestBody CandidateEntity candidateEntity) {
         try {
             var result = this.createCandidateUseCase.execute(candidateEntity);
@@ -48,7 +60,6 @@ public class CandidateController {
 
     @GetMapping("/")
     @PreAuthorize("hasRole('CANDIDATE')")
-    @Tag(name = "Candidate", description = "Information related to the Candidate")
     @Operation(summary = "Listing the candidate profile",
             description = "This function is responsible to search for the user's profile info")
     @ApiResponses({
@@ -77,7 +88,6 @@ public class CandidateController {
     // that list all jobs to be in the CandidateController
     @GetMapping("/job")
     @PreAuthorize("hasRole('CANDIDATE')")
-    @Tag(name = "Candidate", description = "Information related to the Candidate")
     @Operation(summary = "Listing all the job vacancies for the candidate",
             description = "This function is responsible to list all the Job vacancies list, based on the filter")
     @ApiResponses(@ApiResponse(responseCode = "200", content = {
