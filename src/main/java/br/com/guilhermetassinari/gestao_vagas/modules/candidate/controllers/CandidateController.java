@@ -3,6 +3,15 @@ package br.com.guilhermetassinari.gestao_vagas.modules.candidate.controllers;
 import br.com.guilhermetassinari.gestao_vagas.modules.candidate.entities.CandidateEntity;
 import br.com.guilhermetassinari.gestao_vagas.modules.candidate.useCases.CreateCandidateUseCase;
 import br.com.guilhermetassinari.gestao_vagas.modules.candidate.useCases.ProfileCandidateUseCase;
+import br.com.guilhermetassinari.gestao_vagas.modules.company.entities.JobEntity;
+import br.com.guilhermetassinari.gestao_vagas.modules.company.useCases.ListAllJobsByFilterUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -20,6 +30,8 @@ public class CandidateController {
     private final CreateCandidateUseCase createCandidateUseCase;
 
     private final ProfileCandidateUseCase profileCandidateUseCase;
+
+    private final ListAllJobsByFilterUseCase listAllJobsByFilterUseCase;
 
     @PostMapping("/")
     public ResponseEntity<Object> create(@Valid @RequestBody CandidateEntity candidateEntity) {
@@ -45,4 +57,21 @@ public class CandidateController {
         }
 
     }
+
+    // As you need to be logged in as a candidate, it makes more sense for the route
+    // that list all jobs to be in the CandidateController
+    @GetMapping("/job")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    @Tag(name = "Candidate", description = "Information related to the Candidate")
+    @Operation(summary =  "Listing all the job vacancies for the candidate",
+        description = "This function is responsible to list all the Job vacancies list, based on the filter")
+    @ApiResponses(@ApiResponse(responseCode = "200", content = {
+            @Content(
+                    array = @ArraySchema(schema = @Schema(implementation = JobEntity.class))
+            )
+    }))
+    public List<JobEntity> findJobByFilter(@RequestParam String filter) {
+        return this.listAllJobsByFilterUseCase.execute(filter);
+    }
+
 }
