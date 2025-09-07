@@ -1,5 +1,6 @@
 package br.com.guilhermetassinari.gestao_vagas.modules.candidate.controllers;
 
+import br.com.guilhermetassinari.gestao_vagas.modules.candidate.dto.ProfileCandidateResponseDTO;
 import br.com.guilhermetassinari.gestao_vagas.modules.candidate.entities.CandidateEntity;
 import br.com.guilhermetassinari.gestao_vagas.modules.candidate.useCases.CreateCandidateUseCase;
 import br.com.guilhermetassinari.gestao_vagas.modules.candidate.useCases.ProfileCandidateUseCase;
@@ -36,10 +37,10 @@ public class CandidateController {
 
     @PostMapping("/")
     public ResponseEntity<Object> create(@Valid @RequestBody CandidateEntity candidateEntity) {
-        try{
+        try {
             var result = this.createCandidateUseCase.execute(candidateEntity);
             return ResponseEntity.ok().body(result);
-        } catch(Exception e){
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 
@@ -47,10 +48,23 @@ public class CandidateController {
 
     @GetMapping("/")
     @PreAuthorize("hasRole('CANDIDATE')")
+    @Tag(name = "Candidate", description = "Information related to the Candidate")
+    @Operation(summary = "Listing the candidate profile",
+            description = "This function is responsible to search for the user's profile info")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(
+                            schema = @Schema(implementation = ProfileCandidateResponseDTO.class)
+                    )
+            }),
+            @ApiResponse(responseCode = "400", description = "User not found")
+            }
+    )
+    @SecurityRequirement(name = "jwt_auth")
     public ResponseEntity<Object> get(HttpServletRequest request) {
         var idCandidate = request.getAttribute("candidate_id");
 
-        try{
+        try {
             var profile = this.profileCandidateUseCase.execute(UUID.fromString(idCandidate.toString()));
             return ResponseEntity.ok().body(profile);
         } catch (Exception e) {
@@ -64,8 +78,8 @@ public class CandidateController {
     @GetMapping("/job")
     @PreAuthorize("hasRole('CANDIDATE')")
     @Tag(name = "Candidate", description = "Information related to the Candidate")
-    @Operation(summary =  "Listing all the job vacancies for the candidate",
-        description = "This function is responsible to list all the Job vacancies list, based on the filter")
+    @Operation(summary = "Listing all the job vacancies for the candidate",
+            description = "This function is responsible to list all the Job vacancies list, based on the filter")
     @ApiResponses(@ApiResponse(responseCode = "200", content = {
             @Content(
                     array = @ArraySchema(schema = @Schema(implementation = JobEntity.class))
