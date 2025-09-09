@@ -2,6 +2,7 @@ package br.com.guilhermetassinari.gestao_vagas.modules.candidate.useCases;
 
 import br.com.guilhermetassinari.gestao_vagas.exceptions.JobNotFoundException;
 import br.com.guilhermetassinari.gestao_vagas.exceptions.UserNotFoundException;
+import br.com.guilhermetassinari.gestao_vagas.modules.candidate.entities.ApplyJobEntity;
 import br.com.guilhermetassinari.gestao_vagas.modules.candidate.repositories.ApplyJobRepository;
 import br.com.guilhermetassinari.gestao_vagas.modules.candidate.repositories.CandidateRepository;
 import br.com.guilhermetassinari.gestao_vagas.modules.company.repositories.JobRepository;
@@ -18,11 +19,20 @@ public class ApplyJobCandidateUseCase {
 
     private final JobRepository jobRepository;
 
-    private ApplyJobRepository applyJobRepository;
+    private final ApplyJobRepository applyJobRepository;
 
-    public void execute(UUID idCandidate, UUID idJob){
+    public ApplyJobEntity execute(UUID idCandidate, UUID idJob) {
         this.candidateRepository.findById(idCandidate).orElseThrow(UserNotFoundException::new);
 
         this.jobRepository.findById(idJob).orElseThrow(JobNotFoundException::new);
+
+        var applyJob = ApplyJobEntity.builder()
+                .candidateId(idCandidate)
+                .jobId(idJob)
+                .build();
+
+        applyJob = applyJobRepository.save(applyJob);
+
+        return applyJob;
     }
 }
