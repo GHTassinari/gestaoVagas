@@ -2,6 +2,7 @@ package br.com.guilhermetassinari.gestao_vagas.modules.candidate.controllers;
 
 import br.com.guilhermetassinari.gestao_vagas.modules.candidate.dto.ProfileCandidateResponseDTO;
 import br.com.guilhermetassinari.gestao_vagas.modules.candidate.entities.CandidateEntity;
+import br.com.guilhermetassinari.gestao_vagas.modules.candidate.useCases.ApplyJobCandidateUseCase;
 import br.com.guilhermetassinari.gestao_vagas.modules.candidate.useCases.CreateCandidateUseCase;
 import br.com.guilhermetassinari.gestao_vagas.modules.candidate.useCases.ProfileCandidateUseCase;
 import br.com.guilhermetassinari.gestao_vagas.modules.company.entities.JobEntity;
@@ -36,6 +37,8 @@ public class CandidateController {
 
     private final ListAllJobsByFilterUseCase listAllJobsByFilterUseCase;
 
+    private final ApplyJobCandidateUseCase applyJobCandidateUseCase;
+
     @PostMapping("/")
     @Operation(summary = "Register the candidate",
             description = "This function is responsible to register the candidate")
@@ -69,7 +72,7 @@ public class CandidateController {
                     )
             }),
             @ApiResponse(responseCode = "400", description = "User not found")
-            }
+    }
     )
     @SecurityRequirement(name = "jwt_auth")
     public ResponseEntity<Object> get(HttpServletRequest request) {
@@ -98,6 +101,24 @@ public class CandidateController {
     @SecurityRequirement(name = "jwt_auth")
     public List<JobEntity> findJobByFilter(@RequestParam String filter) {
         return this.listAllJobsByFilterUseCase.execute(filter);
+    }
+
+
+    @PostMapping("/job/apply")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    @Operation(summary = "Candidate applies to a job vacancy",
+            description = "This function is responsible to apply the candidate to the job vacancy")
+    @SecurityRequirement(name = "jwt_auth")
+    public ResponseEntity<Object> ApplyJob(HttpServletRequest request, @RequestBody UUID idJob) {
+        var idCandidate = request.getAttribute("candidate_id");
+
+        try {
+            var result = this.applyJobCandidateUseCase.execute(UUID.fromString(idCandidate.toString()), idJob);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
     }
 
 }
