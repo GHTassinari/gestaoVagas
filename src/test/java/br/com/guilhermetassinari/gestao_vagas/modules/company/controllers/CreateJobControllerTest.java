@@ -22,6 +22,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.UUID;
+
 @RequiredArgsConstructor
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -38,7 +40,7 @@ class CreateJobControllerTest {
     private final CompanyRepository companyRepository;
 
     @BeforeEach
-    public void setup(){
+    public void setup() {
         mvc = MockMvcBuilders
                 .webAppContextSetup(webApplicationContext)
                 .apply(SecurityMockMvcConfigurers.springSecurity())
@@ -65,12 +67,28 @@ class CreateJobControllerTest {
                 .build();
 
         var result = mvc.perform(
-                MockMvcRequestBuilders.post("/company/job/")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(TestUtils.objectToJSON(createJobDTO))
-                        .header("Authorization", TestUtils.generateToken(company.getId(), secretKey))
-                        )
-                        .andExpect(MockMvcResultMatchers.status().isOk());
+                        MockMvcRequestBuilders.post("/company/job/")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(TestUtils.objectToJSON(createJobDTO))
+                                .header("Authorization", TestUtils.generateToken(company.getId(), secretKey))
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    public void shouldNotBeAbleToCreateANewJobIfCompanyNotFound() throws Exception {
+        var createJobDTO = CreateJobDTO.builder()
+                .benefits("BENEFITS_TEST")
+                .description("DESCRIPTION_TEST")
+                .level("LEVEL_TEST")
+                .build();
+
+            mvc.perform(
+                    MockMvcRequestBuilders.post("/company/job/")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(TestUtils.objectToJSON(createJobDTO))
+                            .header("Authorization", TestUtils.generateToken(UUID.randomUUID(), secretKey))
+            ).andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
 }
